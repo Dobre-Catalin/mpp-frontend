@@ -16,6 +16,14 @@ export default function CarList() {
     const { cars, setCars } = useContext(CarContext);
     const navigate = useNavigate();
 
+    const authAxios = axios.create({
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        withCredentials: true
+    })
+
     const [page, setPage] = useState(0);
 
     useEffect(() => {
@@ -23,8 +31,8 @@ export default function CarList() {
     }, [page]); // Fetch cars whenever the page changes
 
     const fetchCars = () => {
-        axios
-            .get(`http://localhost:8080/api/cars/get-more-entities?page=${page}&pageSize=5`) // Adjust the API endpoint to accept pagination parameters
+        authAxios
+            .get(`http://192.168.110.250:8080/api/cars/get-more-entities?page=${page}&pageSize=5`) // Adjust the API endpoint to accept pagination parameters
             .then((response) => {
                 if (page === 0) {
                     // If it's the first page, replace the existing data
@@ -51,7 +59,7 @@ export default function CarList() {
     const handleDeleteCar = (e, car) => {
         e.stopPropagation();
         axios
-            .delete(`http://localhost:8080/api/cars/delete/${car.ID}`)
+            .delete(`http://192.168.110.250:8080/api/cars/delete/${car.ID}`)
             .then((response) => {
                 console.log(response);
                 window.alert("Car deleted successfully");
@@ -60,7 +68,7 @@ export default function CarList() {
             .catch((error) => {
                 console.error("Error deleting car:", error);
                 window.alert("Error deleting car");
-                queueRequest(`http://localhost:8080/api/cars/delete/${car.ID}`, "DELETE", car.ID);
+                queueRequest(`http://192.168.110.250:8080/api/cars/delete/${car.ID}`, "DELETE", car.ID);
                 setCars(cars.filter((c) => c.ID !== car.ID)); // Update the local state without the deleted car
             });
     };

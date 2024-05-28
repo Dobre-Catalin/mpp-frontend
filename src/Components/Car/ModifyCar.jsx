@@ -28,7 +28,7 @@ export default function ModifyCar() {
     const { locations, setLocations } = useContext(LocationContext);
 
     const loadLocations = () => {
-        axios.get('http://localhost:8080/api/locations/get')
+        axios.get('http://188.27.132.161:8080/api/locations/get')
             .then(response => {
                 setLocations(response.data);
             })
@@ -78,6 +78,14 @@ export default function ModifyCar() {
         console.log(make, model, year, color, mileage, accidents, engineCapacity, engineType, price, about, location)
         window.alert(make, model, year, color, mileage, accidents, engineCapacity, engineType, price, about, location)
 
+        const authAxios = axios.create({
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            withCredentials: true
+        })
+
         const newCar = {
             make: make,
             model: model,
@@ -92,7 +100,7 @@ export default function ModifyCar() {
             locationId: location
         };
 
-        axios.put(`http://localhost:8080/api/cars/update/${car.ID}`, newCar)
+        authAxios.put(`http://192.168.110.250:8080/api/cars/update/${car.ID}`, newCar)
             .then(response => {
                 console.log(response);
                 setCars([...cars.filter((c) => c.ID !== car.ID), newCar]);
@@ -105,7 +113,7 @@ export default function ModifyCar() {
                 window.alert(error);
                 // Queue the request to be sent later
 
-                queueRequest(`http://localhost:8080/api/cars/update/${car.ID}`, 'PUT', newCar);
+                queueRequest(`http://192.168.110.250:8080/api/cars/update/${car.ID}`, 'PUT', newCar);
 
                 // Update the local state to reflect the update
                 setCars([...cars.filter((c) => c.ID !== car.ID), newCar]);

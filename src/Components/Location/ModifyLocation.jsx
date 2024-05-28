@@ -50,7 +50,15 @@ export default function ModifyLocation() {
             address: address,
         };
 
-        axios.put(`http://localhost:8080/api/locations/update/${locationData.id}`, newLocation)
+        const authAxios = axios.create({
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            withCredentials: true
+        })
+
+        authAxios.put(`http://localhost:8080/api/locations/update/${locationData.id}`, newLocation)
             .then((response) => {
                 console.log(response);
                 window.alert('Location modified successfully');

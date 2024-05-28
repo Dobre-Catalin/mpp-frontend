@@ -23,6 +23,14 @@ export default function LocationList() {
     const [fetchTimeout, setFetchTimeout] = useState(null);
     const [infiniteScroll, setInfiniteScroll] = useState(false); // State for infinite scrolling
 
+    const authAxios = axios.create({
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        withCredentials: true
+    })
+
     useEffect(() => {
         // Fetch locations when the component mounts
         fetchLocations();
@@ -34,8 +42,8 @@ export default function LocationList() {
     }, []); // Empty dependency array to run only once when component mounts
 
     const fetchLocations = () => {
-        axios
-            .get("http://localhost:8080/api/locations/get")
+        authAxios
+            .get("http://192.168.110.250:8080/api/locations/get")
             .then((response) => {
                 setLocations(response.data);
             })
@@ -72,13 +80,13 @@ export default function LocationList() {
         const confirmDelete = window.confirm(`Are you sure you want to remove ${location.name} from the list?`);
         if (confirmDelete) {
             axios
-                .delete(`http://localhost:8080/api/locations/delete/${location.id}`)
+                .delete(`http://192.168.110.250:8080/api/locations/delete/${location.id}`)
                 .then(() => {
                     fetchLocations();
                 })
                 .catch((error) => {
                     console.error("Error deleting location:", error);
-                    queueRequest(`http://localhost:8080/api/locations/delete/${location.id}`, "DELETE", location.id);
+                    queueRequest(`http://188.27.132.161:8080/api/locations/delete/${location.id}`, "DELETE", location.id);
 
                     // Update the local state to reflect the deletion
                     setLocations(locations.filter((loc) => loc.id !== location.id));

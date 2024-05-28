@@ -13,7 +13,7 @@ const Settings = () => {
     const navigate = useNavigate();
 
     //fetch the current settings
-    axios.get('http://localhost:8080/api/cars/settings').then(response => {
+    axios.get('http://188.27.132.161:8080/api/cars/settings').then(response => {
         console.log(response);
         setNumberOfEntities(response.data.entitiesToAdd);
         setInterval(response.data.interval);
@@ -23,7 +23,7 @@ const Settings = () => {
         e.preventDefault();
         // Send data to backend /api/cars/settings
         try {
-            const response = await axios.get('http://localhost:8080/api/cars/settings', {
+            const response = await axios.get('http://188.27.132.161:8080/api/cars/settings', {
                 entitiesToAdd: numberOfEntities,
                 interval: interval
             });

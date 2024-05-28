@@ -14,7 +14,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
-import {useContext} from "react";
+import {useContext, useState} from "react";
 import {CarContext} from "../../Context/CarListContext";
 import {MenuItem, Select} from "@mui/material";
 import {LocationContext} from "../../Context/LocationListContext";
@@ -27,12 +27,13 @@ const theme = createTheme();
 export default function AddCar() {
     const navigate = useNavigate();
 
+    const { user } = useContext(CarContext);
     const { cars, setCars } = useContext(CarContext);
     const { locations, setLocations } = useContext(LocationContext);
 
     ///load the locations in the select
     const loadLocations = () => {
-        axios.get('http://localhost:8080/api/locations/get')
+        axios.get('http://188.27.132.161:8080/api/locations/get')
             .then(response => {
                 setLocations(response.data);
             })
@@ -43,8 +44,15 @@ export default function AddCar() {
             });
     }
 
+    const authAxios = axios.create({
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+            },
+        withCredentials: true
+    })
+
     const handleSubmit = async (event) => {
-        event.preventDefault();
         const data = new FormData(event.currentTarget);
         const make = data.get('Make');
         const model = data.get('Model');
@@ -60,6 +68,8 @@ export default function AddCar() {
 
         console.log(make, model, year, color, mileage, accidents, engineCapacity, engineType, price, about, location)
 
+        console.log('submitting');
+
         const newCar = {
             make: make,
             model: model,
@@ -72,23 +82,28 @@ export default function AddCar() {
             price: price,
             about: about,
             locationId: location
-        }
-        axios.post('http://localhost:8080/api/cars/create', newCar).then(response => {
-            console.log(response);
-            window.alert("Car added successfully");
-            setCars([...cars, newCar]);
-            navigate('/products');
-        }).catch(error => {
-            console.log(error);
-            console.log("Error adding car to the server");
-            window.alert(error);
-
-            // Queue the request to be sent later
-            queueRequest('http://localhost:8080/api/cars/create', 'POST',newCar);
-
-            //update the local state to reflect the addition
-            setCars([...cars, newCar]);
-        });
+        };
+        await authAxios.post('http://188.27.132.161:8080/api/cars/create', newCar)
+            .then(response => {
+                console.log('response given for debug:', response.data);
+                const updatedCars = [...cars, response.data];
+                setCars(updatedCars);
+                window.alert('Car added successfully');
+                navigate('/products');
+            })
+            .catch(error => {
+                if(error.response.status !== 403){
+                    console.log("Error fetching data from the server debug:", error);
+                    window.alert('Error adding car, queueing request');
+                    queueRequest('POST', 'http://188.27.132.161:8080/api/cars/add', newCar, setCars);
+                    navigate('/products');
+                }
+                else{
+                    console.log('Error:', error);
+                    console.log("Not authorized to add a car");
+                    window.alert('You are not authorized to add a car');
+                }
+            });
     };
 
     return (

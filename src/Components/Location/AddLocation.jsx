@@ -30,6 +30,14 @@ export default function AddLocation() {
 
     const { locations, setLocations } = useContext(LocationContext);
 
+    const authAxios = axios.create({
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        },
+        withCredentials: true
+    })
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -42,7 +50,7 @@ export default function AddLocation() {
             nameOfLocation: locationName,
             address: addressData
         }
-        axios.post('http://localhost:8080/api/locations/create', newLocation).then(response => {
+        authAxios.post('http://192.168.110.250:8080/api/locations/create', newLocation).then(response => {
             console.log(response);
             window.alert("location added successfully");
             setLocations([...locations, newLocation]);
@@ -56,7 +64,7 @@ export default function AddLocation() {
 
             setLocations([...locations, newLocation]);
 
-            queueRequest('http://localhost:8080/api/locations/create', 'POST', newLocation);
+            queueRequest('http://192.168.110.250:8080/api/locations/create', 'POST', newLocation);
         });
     };
 
